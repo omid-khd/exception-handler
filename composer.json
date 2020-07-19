@@ -3,8 +3,8 @@
     "description": "A library to convert exception to a response object",
     "type": "library",
     "require-dev": {
-        "mockery/mockery": "^1.4",
-        "phpunit/phpunit": "7.1|^8.0"
+        "phpunit/phpunit": "7.1|^8.0",
+        "mockery/mockery": "1.3.*"
     },
     "license": "MIT",
     "authors": [
