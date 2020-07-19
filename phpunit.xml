@@ -20,6 +20,10 @@
     <filter>
         <whitelist>
             <directory>./src/</directory>
+            <exclude>
+                <directory>./src/Exception</directory>
+                <file>./src/Reporter/NullExceptionReporter.php</file>
+            </exclude>
         </whitelist>
     </filter>
 </phpunit>
