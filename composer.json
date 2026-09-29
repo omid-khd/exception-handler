@@ -1,4 +1,16 @@
 {
+  "name": "omid-khd/exception-handler",
+  "description": "A flexible and extensible exception handler for PHP applications.",
+  "type": "library",
+  "license": "MIT",
+  "keywords": [
+    "exception",
+    "exception-handler",
+    "error-handler",
+    "middleware",
+    "http",
+    "translation"
+  ],
   "autoload": {
     "psr-4": {
       "ExceptionHandler\\": "src/"
@@ -16,6 +28,6 @@
     "webmozart/assert": "^2.1"
   },
   "require-dev": {
-    "phpunit/phpunit": "^9.5"
+    "phpunit/phpunit": "^10.5 || ^11.0"
   }
 }
