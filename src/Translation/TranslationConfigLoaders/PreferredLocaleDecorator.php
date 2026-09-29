@@ -26,8 +26,16 @@ final readonly class PreferredLocaleDecorator implements TranslationConfigLoader
     public function load(Throwable $e): TranslationConfig
     {
         $config = $this->translationConfigLoader->load($e);
-        $config->locale = $this->preferredLocaleProvider->getPreferredLocale() ?? self::LOCALE_EN;
 
-        return $config;
+        if ($config->locale !== null) {
+            return $config;
+        }
+
+        return new TranslationConfig(
+            $config->id,
+            $config->parameters,
+            $config->domain,
+            $this->preferredLocaleProvider->getPreferredLocale() ?? self::LOCALE_EN,
+        );
     }
 }

@@ -204,6 +204,38 @@ final class StaticListTest extends TestCase
         $loader->get(new Exception());
     }
 
+    public function testItThrowsEntryNotFoundWhenNoListEntryMatches(): void
+    {
+        $loader = new StaticList($this->createMock(ContainerInterface::class));
+        $loader->setList([RuntimeException::class => static fn (): bool => true]);
+
+        try {
+            $loader->get(new Exception());
+            $this->fail('Expected FactoryResolutionException to be thrown');
+        } catch (FactoryResolutionException $e) {
+            $this->assertStringContainsString('No entry', $e->getMessage());
+            $this->assertStringContainsString(Exception::class, $e->getMessage());
+        }
+    }
+
+    public function testMethodNotFoundMessageContainsServiceIdAndMethod(): void
+    {
+        $container = $this->createMock(ContainerInterface::class);
+        $container->expects($this->once())->method('has')->with(stdClass::class)->willReturn(true);
+        $container->expects($this->once())->method('get')->with(stdClass::class)->willReturn(new stdClass());
+
+        $loader = new StaticList($container);
+        $loader->setList([Exception::class => [stdClass::class, 'load']]);
+
+        try {
+            $loader->get(new Exception());
+            $this->fail('Expected FactoryResolutionException to be thrown');
+        } catch (FactoryResolutionException $e) {
+            $this->assertStringContainsString(stdClass::class, $e->getMessage());
+            $this->assertStringContainsString('load', $e->getMessage());
+        }
+    }
+
     public function testItThrowExceptionIfFactoryDoesNotHasGivenServiceId(): void
     {
         $container = $this->createMock(ContainerInterface::class);

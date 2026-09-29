@@ -51,6 +51,10 @@ class StaticList
         $class = array_intersect_key($this->list, $this->getClassHierarchy($e));
         $class = array_shift($class);
 
+        if ($class === null) {
+            throw FactoryResolutionException::entryNotFound($e::class);
+        }
+
         if (is_callable($class)) {
             return $class;
         }

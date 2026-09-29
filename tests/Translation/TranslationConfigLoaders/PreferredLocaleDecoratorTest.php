@@ -40,6 +40,39 @@ final class PreferredLocaleDecoratorTest extends TestCase
         $this->assertEquals('en', $config->locale);
     }
 
+    public function testItKeepsLocaleSetOnConfig(): void
+    {
+        $preferredLocaleProvider = $this->createMock(PreferredLocaleProviderInterface::class);
+        $preferredLocaleProvider->method('getPreferredLocale')->willReturn('nl_NL');
+
+        $decoratedLoader = $this->createMock(TranslationConfigLoaderInterface::class);
+        $decoratedLoader->expects($this->once())->method('load')->willReturn(new TranslationConfig('trans_id', [], null, 'de_DE'));
+        $loader = new PreferredLocaleDecorator($decoratedLoader, $preferredLocaleProvider);
+
+        $exception = new Exception('Error');
+
+        $config = $loader->load($exception);
+        $this->assertEquals('de_DE', $config->locale);
+    }
+
+    public function testItDoesNotMutateConfigReturnedByDecoratedLoader(): void
+    {
+        $preferredLocaleProvider = $this->createMock(PreferredLocaleProviderInterface::class);
+        $preferredLocaleProvider->expects($this->once())->method('getPreferredLocale')->willReturn('nl_NL');
+
+        $config = new TranslationConfig('trans_id');
+        $decoratedLoader = $this->createMock(TranslationConfigLoaderInterface::class);
+        $decoratedLoader->expects($this->once())->method('load')->willReturn($config);
+        $loader = new PreferredLocaleDecorator($decoratedLoader, $preferredLocaleProvider);
+
+        $exception = new Exception('Error');
+
+        $result = $loader->load($exception);
+
+        $this->assertNull($config->locale);
+        $this->assertEquals('nl_NL', $result->locale);
+    }
+
     public function testItSetLocaleToPreferredLocale(): void
     {
         $preferredLocaleProvider = $this->createMock(PreferredLocaleProviderInterface::class);

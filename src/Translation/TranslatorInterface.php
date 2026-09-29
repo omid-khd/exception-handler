@@ -6,5 +6,5 @@ namespace ExceptionHandler\Translation;
 
 interface TranslatorInterface
 {
-    public function trans(string $id, array $parameters = [], string $domain = null, string $locale = null): string;
+    public function trans(string $id, array $parameters = [], ?string $domain = null, ?string $locale = null): string;
 }
