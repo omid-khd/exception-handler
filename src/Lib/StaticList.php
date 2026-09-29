@@ -10,7 +10,7 @@ use Throwable;
 class StaticList
 {
     /**
-     * @var array<class-string, callable(Throwable $e): mixed>
+     * @var array<class-string, callable(Throwable $e): mixed|string|array{0: string, 1: string}>
      */
     private array $list = [];
 
@@ -19,7 +19,7 @@ class StaticList
     }
 
     /**
-     * @param array<class-string, callable(Throwable $e): mixed> $list
+     * @param array<class-string, callable(Throwable $e): mixed|string|array{0: string, 1: string}> $list
      */
     public function setList(array $list): void
     {
@@ -48,22 +48,29 @@ class StaticList
 
     private function getFactory(Throwable $e): callable
     {
-        $class = array_intersect_key($this->list, $this->getClassHierarchy($e));
-        $class = array_shift($class);
-
-        if ($class === null) {
-            throw FactoryResolutionException::entryNotFound($e::class);
+        foreach (array_keys($this->getClassHierarchy($e)) as $candidate) {
+            if (isset($this->list[$candidate])) {
+                return $this->resolveFactory($this->list[$candidate]);
+            }
         }
 
-        if (is_callable($class)) {
-            return $class;
+        throw FactoryResolutionException::entryNotFound($e::class);
+    }
+
+    /**
+     * @param callable(Throwable $e): mixed|string|array{0: string, 1: string} $factory
+     */
+    private function resolveFactory(callable|string|array $factory): callable
+    {
+        if (is_callable($factory)) {
+            return $factory;
         }
 
-        $type = gettype($class);
+        $type = gettype($factory);
 
         return match ($type) {
-            'string' => $this->resolveFactoryFromClassFqn($class),
-            'array' => $this->resolveFactoryFromArray($class),
+            'string' => $this->resolveFactoryFromClassFqn($factory),
+            'array' => $this->resolveFactoryFromArray($factory),
             default => throw FactoryResolutionException::invalidFactoryType($type),
         };
     }

@@ -8,15 +8,20 @@ use ExceptionHandler\Translation\TranslationConfig;
 use ExceptionHandler\Translation\TranslationConfigLoaders\Attribute\TranslationConfig as TranslationConfigAttribute;
 use ExceptionHandler\Translation\TranslationConfigLoaders\TranslationConfigLoaderInterface;
 use ReflectionAttribute;
-use ReflectionObject;
+use ReflectionClass;
 use Throwable;
 use Webmozart\Assert\Assert;
 
 final class AttributeTranslationConfigLoader implements TranslationConfigLoaderInterface
 {
+    /**
+     * @var array<class-string, TranslationConfigAttribute|null>
+     */
+    private array $attributeCache = [];
+
     public function support(Throwable $e): bool
     {
-        return $this->getTranslationConfigAttribute($e) instanceof TranslationConfigAttribute;
+        return $this->getTranslationConfigAttribute($e) !== null;
     }
 
     public function load(Throwable $e): TranslationConfig
@@ -30,14 +35,19 @@ final class AttributeTranslationConfigLoader implements TranslationConfigLoaderI
 
     private function getTranslationConfigAttribute(Throwable $e): ?TranslationConfigAttribute
     {
-        $refObject = new ReflectionObject($e);
-        $attributes = $refObject->getAttributes(TranslationConfigAttribute::class, ReflectionAttribute::IS_INSTANCEOF);
+        $class = $e::class;
 
-        if (empty($attributes)) {
-            return null;
+        if (!array_key_exists($class, $this->attributeCache)) {
+            $this->attributeCache[$class] = $this->resolveAttribute($class);
         }
 
-        $attribute = array_shift($attributes);
+        return $this->attributeCache[$class];
+    }
+
+    private function resolveAttribute(string $class): ?TranslationConfigAttribute
+    {
+        $attributes = (new ReflectionClass($class))->getAttributes(TranslationConfigAttribute::class);
+        $attribute = $attributes[0] ?? null;
 
         return $attribute instanceof ReflectionAttribute ? $attribute->newInstance() : null;
     }

@@ -10,17 +10,28 @@ use Webmozart\Assert\Assert;
 class ExceptionMetadataLoader
 {
     /**
+     * @var list<MetadataLoaderInterface>
+     */
+    private readonly array $metadataLoaders;
+
+    /**
      * @param iterable<MetadataLoaderInterface> $metadataLoaders
      */
-    public function __construct(private readonly iterable $metadataLoaders = [])
+    public function __construct(iterable $metadataLoaders = [])
     {
+        $loaders = [];
+
+        foreach ($metadataLoaders as $metadataLoader) {
+            Assert::isInstanceOf($metadataLoader, MetadataLoaderInterface::class);
+            $loaders[] = $metadataLoader;
+        }
+
+        $this->metadataLoaders = $loaders;
     }
 
     public function loadMetadata(Throwable $e): ExceptionMetadata
     {
         foreach ($this->metadataLoaders as $metadataLoader) {
-            Assert::isInstanceOf($metadataLoader, MetadataLoaderInterface::class);
-
             if ($metadataLoader->support($e)) {
                 return $metadataLoader->load($e);
             }

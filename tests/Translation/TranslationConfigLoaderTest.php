@@ -29,6 +29,13 @@ final class TranslationConfigLoaderTest extends TestCase
         $this->assertNull($translationConfigLoader->load(new Exception('Error')));
     }
 
+    public function testItThrowsWhenAGivenLoaderIsNotATranslationConfigLoader(): void
+    {
+        $this->expectException(\LogicException::class);
+
+        new TranslationConfigLoader([new \stdClass()]);
+    }
+
     public function testItDelegateLoadingTranslationConfigToLoader(): void
     {
         $config = new TranslationConfig('translation_id');

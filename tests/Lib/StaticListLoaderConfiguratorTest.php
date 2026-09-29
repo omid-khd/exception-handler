@@ -11,6 +11,28 @@ use PHPUnit\Framework\TestCase;
 
 final class StaticListLoaderConfiguratorTest extends TestCase
 {
+    public function testItCanConfigureMoreThanOnceByFile(): void
+    {
+        $list = ['some_exception' => 'some_factory'];
+        $file = __DIR__ . '/list_repeatable.php';
+
+        try {
+            file_put_contents($file, sprintf('<?php return %s;', var_export($list, true)));
+
+            $configurator = new StaticListLoaderConfigurator($file);
+
+            $loader = $this->createMock(StaticList::class);
+            $loader->expects($this->exactly(2))->method('setList')->with($list);
+
+            $configurator->configure($loader);
+            $configurator->configure($loader);
+        } finally {
+            if (file_exists($file)) {
+                unlink($file);
+            }
+        }
+    }
+
     public function testItThrowExceptionIfGivenFileDoesNotExist(): void
     {
         $configurator = new StaticListLoaderConfigurator('list.php');

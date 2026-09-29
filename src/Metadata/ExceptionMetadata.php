@@ -8,8 +8,11 @@ use Throwable;
 
 final readonly class ExceptionMetadata
 {
-    public function __construct(public int $code, public string $message, public Throwable $throwable)
-    {
+    public function __construct(
+        private int $code,
+        private string $message,
+        private Throwable $throwable,
+    ) {
     }
 
     public function getCode(): int

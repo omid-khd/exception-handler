@@ -33,6 +33,13 @@ final class ExceptionMetadataLoaderTest extends TestCase
         $this->assertEquals('Internal Server Error', $metadata->getMessage());
     }
 
+    public function testItThrowsWhenAGivenLoaderIsNotAMetadataLoader(): void
+    {
+        $this->expectException(\LogicException::class);
+
+        new ExceptionMetadataLoader([new \stdClass()]);
+    }
+
     public function testItDelegateLoadingMetadataToMetadataLoaders(): void
     {
         $exception = new Exception();
