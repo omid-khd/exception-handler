@@ -67,6 +67,21 @@ final class AttributeMetadataLoaderTest extends TestCase
         $this->assertEquals(500, $metadata->getCode());
     }
 
+    public function testItReturnsConsistentMetadataOnRepeatedCalls(): void
+    {
+        $loader = new AttributeMetadataLoader();
+        $exception = new ExceptionWithAttribute();
+
+        $this->assertTrue($loader->support($exception));
+        $first = $loader->load($exception);
+
+        $this->assertTrue($loader->support($exception));
+        $second = $loader->load($exception);
+
+        $this->assertSame($first->getCode(), $second->getCode());
+        $this->assertSame($first->getMessage(), $second->getMessage());
+    }
+
     private function phpVersionIsBelow8(): bool
     {
         return PHP_VERSION_ID < 80000;

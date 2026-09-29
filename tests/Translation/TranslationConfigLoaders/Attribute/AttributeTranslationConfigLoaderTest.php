@@ -66,6 +66,20 @@ final class AttributeTranslationConfigLoaderTest extends TestCase
         $this->assertEquals('trans_id', $config->id);
     }
 
+    public function testItReturnsConsistentConfigOnRepeatedCalls(): void
+    {
+        $loader = new AttributeTranslationConfigLoader();
+        $exception = new ExceptionWithAttribute();
+
+        $this->assertTrue($loader->support($exception));
+        $first = $loader->load($exception);
+
+        $this->assertTrue($loader->support($exception));
+        $second = $loader->load($exception);
+
+        $this->assertSame($first->id, $second->id);
+    }
+
     private function phpVersionIsBelow8(): bool
     {
         return PHP_VERSION_ID < 80000;

@@ -13,15 +13,13 @@ class StaticListLoaderConfigurator
     /**
      * @param array<class-string, callable(Throwable $e): mixed>|string $list
      */
-    final public function __construct(private array|string $list)
+    public function __construct(private readonly array|string $list)
     {
     }
 
     public function configure(StaticList $loader): void
     {
-        $list = $this->getList();
-
-        $loader->setList($list);
+        $loader->setList($this->getList());
     }
 
     /**
@@ -45,6 +43,6 @@ class StaticListLoaderConfigurator
 
         Assert::isArray($list);
 
-        return $this->list = $list;
+        return $list;
     }
 }

@@ -64,6 +64,28 @@ final class StaticListTest extends TestCase
         $this->assertTrue($loader->has(new Exception()));
     }
 
+    public function testItPrefersTheMostSpecificClassOverEarlierEntries(): void
+    {
+        $loader = new StaticList($this->createMock(ContainerInterface::class));
+        $loader->setList([
+            Exception::class => static fn (): bool => false,
+            RuntimeException::class => static fn (): bool => true,
+        ]);
+
+        $this->assertTrue($loader->get(new RuntimeException())(new RuntimeException()));
+    }
+
+    public function testItPrefersTheThrowableClassOverItsInterfaces(): void
+    {
+        $loader = new StaticList($this->createMock(ContainerInterface::class));
+        $loader->setList([
+            Throwable::class => static fn (): bool => false,
+            RuntimeException::class => static fn (): bool => true,
+        ]);
+
+        $this->assertTrue($loader->get(new RuntimeException())(new RuntimeException()));
+    }
+
     public function testItThrowExceptionIfGivenLoaderIsNotCallableServiceIdOrArray(): void
     {
         $loader = new StaticList($this->createMock(ContainerInterface::class));

@@ -10,15 +10,29 @@ use Webmozart\Assert\Assert;
 
 final class TranslationConfigLoader
 {
-    public function __construct(private readonly iterable $configLoaders = [])
+    /**
+     * @var list<TranslationConfigLoaderInterface>
+     */
+    private readonly array $configLoaders;
+
+    /**
+     * @param iterable<TranslationConfigLoaderInterface> $configLoaders
+     */
+    public function __construct(iterable $configLoaders = [])
     {
+        $loaders = [];
+
+        foreach ($configLoaders as $configLoader) {
+            Assert::isInstanceOf($configLoader, TranslationConfigLoaderInterface::class);
+            $loaders[] = $configLoader;
+        }
+
+        $this->configLoaders = $loaders;
     }
 
     public function load(Throwable $e): ?TranslationConfig
     {
         foreach ($this->configLoaders as $configLoader) {
-            Assert::isInstanceOf($configLoader, TranslationConfigLoaderInterface::class);
-
             if ($configLoader->support($e)) {
                 return $configLoader->load($e);
             }
